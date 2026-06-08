@@ -1,9 +1,12 @@
 import csv  
 
+# ==============================
+# Constantes
+# ==============================
+
 ARCHIVO_CSV = 'paises_prueba.csv'
 
-
-#=== Constantes de Mensajes ===
+#Mensajes de Error
 ERROR_ARCHIVO_NO_ENCONTRADO = "Error: no se encontró el archivo {}."
 ERROR_CSV_COLUMNA_FALTANTE = "Error: falta la columna {} en el archivo CSV."
 ERROR_CSV_NUMERO_INVALIDO = "Error: el país {} tiene un valor numérico inválido en población o superficie."
@@ -16,10 +19,13 @@ ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
 ERROR_RANGO_INVALIDO = "Error: el valor mínimo no puede ser mayor que el valor máximo."
 ERROR_GUARDADO_ARCHIVO = "Error: no se pudo guardar el archivo. Verifique que no esté abierto en otro programa."
 
+#Mensajes de Advertencia
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 ADVERTENCIA_CSV_CON_ERRORES = "Advertencia: algunos países del CSV tenían errores y no fueron cargados."
 ADVERTENCIA_GUARDADO_LIMPIEZA = "Si guarda los cambios, los países con errores serán eliminados del archivo CSV."
 
+#Mensajes Generales
+MENSAJE_PAIS_AGREGADO = "País agregado correctamente."
 MENSAJE_NO_HAY_PAISES = "No hay países para mostrar."
 MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."
 MENSAJE_SALIDA = "Saliendo del programa..."
@@ -34,7 +40,9 @@ MENSAJE_GUARDADO_CANCELADO = "Guardado cancelado."
 
 CONFIRMAR_GUARDADO_CON_ERRORES = "El CSV tenía errores. Si continúa, se guardarán solo los países válidos. ¿Desea continuar? (s/n): "
 
-#=== Funciones de Menú ===
+# ==============================
+# Funciones de menú
+# ==============================
 
 def mostrar_menu():
     """
@@ -74,7 +82,10 @@ def mostrar_menu_ordenamientos():
     print("3. Ordenar por superficie")
     print("0. Volver al menú principal")
 
-#=== Funciones Auxiliares ===
+# =================================
+# Funciones de validación y entrada
+# =================================
+
 
 def tiene_campos_vacios(fila):
     """
@@ -86,38 +97,6 @@ def tiene_campos_vacios(fila):
         fila["superficie"] is None or fila["superficie"].strip() == "" or
         fila["continente"] is None or fila["continente"].strip() == ""
     )
-
-def mostrar_pais(pais):
-    """
-    Muestra los datos de un país de forma ordenada.
-    """
-
-    print(f"Nombre: {pais['nombre']}")
-    print(f"Población: {pais['poblacion']}")
-    print(f"Superficie: {pais['superficie']} km²")
-    print(f"Continente: {pais['continente']}")
-
-
-def buscar_paises_por_nombre(paises, nombre_buscado):
-    """
-    Busca países por nombre.
-    Permite coincidencias parciales y no distingue entre mayúsculas y minúsculas.
-    """
-
-    resultados = []
-
-    # Se normaliza el texto buscado para comparar sin importar mayúsculas/minúsculas
-    nombre_buscado = nombre_buscado.strip().lower()
-
-    # Se recorren todos los países cargados
-    for pais in paises:
-        nombre_pais = pais["nombre"].lower()
-
-        # Si el texto buscado aparece dentro del nombre del país, se agrega a resultados
-        if nombre_buscado in nombre_pais:
-            resultados.append(pais)
-
-    return resultados
 
 def pedir_texto_no_vacio(mensaje):
     """
@@ -133,7 +112,6 @@ def pedir_texto_no_vacio(mensaje):
         texto = input(mensaje).strip()
 
     return texto
-
 
 def pedir_entero_positivo(mensaje):
     """
@@ -159,6 +137,119 @@ def pedir_entero_positivo(mensaje):
             print(ERROR_NUMERO_INVALIDO)
 
     return numero
+
+def pedir_rango(mensaje_minimo, mensaje_maximo):
+    """
+    Solicita un rango numérico válido.
+    Devuelve el mínimo y el máximo ingresados.
+    """
+
+    while True:
+        # Se solicitan ambos valores usando la validación de enteros positivos
+        minimo = pedir_entero_positivo(mensaje_minimo)
+        maximo = pedir_entero_positivo(mensaje_maximo)
+
+        # Se valida que el mínimo no sea mayor que el máximo
+        if minimo <= maximo:
+            return minimo, maximo
+
+        print(ERROR_RANGO_INVALIDO)
+
+def pedir_tipo_orden():
+    """
+    Solicita al usuario el tipo de ordenamiento.
+    Devuelve False para ascendente y True para descendente.
+    """
+
+    while True:
+        print("\nSeleccione el tipo de orden:")
+        print("1. Ascendente")
+        print("2. Descendente")
+
+        # Se solicita la opción y se eliminan espacios innecesarios
+        opcion = input("Seleccione una opción: ").strip()
+
+        # En sorted(), reverse=False indica orden ascendente
+        if opcion == "1":
+            return False
+
+        # En sorted(), reverse=True indica orden descendente
+        elif opcion == "2":
+            return True
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+def confirmar_guardado_con_errores():
+    """
+    Solicita confirmación al usuario antes de guardar cuando el CSV tenía errores.
+    Devuelve True si el usuario confirma y False si cancela.
+    """
+
+    while True:
+        # Se pide confirmación porque guardar eliminará los registros inválidos del CSV
+        respuesta = input(CONFIRMAR_GUARDADO_CON_ERRORES).strip().lower()
+
+        if respuesta == "s":
+            return True
+
+        elif respuesta == "n":
+            return False
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+# ==============================
+# Funciones de visualización
+# ==============================
+
+
+def mostrar_pais(pais):
+    """
+    Muestra los datos de un país de forma ordenada.
+    """
+
+    print(f"Nombre: {pais['nombre']}")
+    print(f"Población: {pais['poblacion']}")
+    print(f"Superficie: {pais['superficie']} km²")
+    print(f"Continente: {pais['continente']}")
+
+def mostrar_paises(paises):
+    """
+    Muestra una lista de países.
+    """
+
+    if not paises:
+        print(MENSAJE_NO_HAY_PAISES)
+    else:
+        for pais in paises:
+            print("-" * 40)
+            mostrar_pais(pais)
+
+# ==============================
+# Funciones de búsqueda y selección
+# ==============================
+
+def buscar_paises_por_nombre(paises, nombre_buscado):
+    """
+    Busca países por nombre.
+    Permite coincidencias parciales y no distingue entre mayúsculas y minúsculas.
+    """
+
+    resultados = []
+
+    # Se normaliza el texto buscado para comparar sin importar mayúsculas/minúsculas
+    nombre_buscado = nombre_buscado.strip().lower()
+
+    # Se recorren todos los países cargados
+    for pais in paises:
+        nombre_pais = pais["nombre"].lower()
+
+        # Si el texto buscado aparece dentro del nombre del país, se agrega a resultados
+        if nombre_buscado in nombre_pais:
+            resultados.append(pais)
+
+    return resultados
 
 def existe_pais(paises, nombre):
     """
@@ -210,22 +301,97 @@ def seleccionar_pais(resultados):
             # Si el usuario ingresa algo que no puede convertirse a entero
             print(MENSAJE_OPCION_INVALIDA)
 
-def pedir_rango(mensaje_minimo, mensaje_maximo):
+# ==============================
+# Funciones de archivos CSV
+# ==============================
+
+def cargar_paises(nombre_archivo):
     """
-    Solicita un rango numérico válido.
-    Devuelve el mínimo y el máximo ingresados.
+    Lee el archivo CSV y devuelve una lista de diccionarios.
+    Cada diccionario representa un país.
+    """
+    
+    paises = []
+    hubo_errores_csv = False
+    try:
+        
+        with open(nombre_archivo, mode='r', encoding='utf-8', newline='') as archivo: # Abrir el archivo CSV en modo lectura con codificación UTF-8
+            lector = csv.DictReader(archivo) # Crear un lector de CSV que devuelve cada fila como un diccionario
+            for fila in lector:
+
+                try:
+                    if tiene_campos_vacios(fila):
+                        print(ERROR_PAIS_CON_CAMPO_VACIO.format(fila["nombre"]))
+                        hubo_errores_csv = True
+                        continue
+
+                    pais = {
+                        "nombre": fila["nombre"].strip(),
+                        "poblacion": int(fila["poblacion"]),
+                        "superficie": int(fila["superficie"]),
+                        "continente": fila["continente"].strip()
+                    }
+
+                    paises.append(pais)
+
+                except ValueError:
+                    hubo_errores_csv = True
+                    print(ERROR_CSV_NUMERO_INVALIDO.format(fila["nombre"]))
+    
+    except FileNotFoundError:
+        hubo_errores_csv = True
+        print(ERROR_ARCHIVO_NO_ENCONTRADO.format(nombre_archivo))
+
+    
+    except KeyError as e:
+        hubo_errores_csv = True
+        print(ERROR_CSV_COLUMNA_FALTANTE.format(e))
+    
+    if not paises:
+        print(ADVERTENCIA_NO_HAY_PAISES)
+    
+    if hubo_errores_csv:
+        print("=" * 100)
+        print(ADVERTENCIA_CSV_CON_ERRORES)
+        print(ADVERTENCIA_GUARDADO_LIMPIEZA)
+        print(MENSAJE_RECOMENDACION_CSV)
+        print("=" * 100)
+    return paises, hubo_errores_csv
+
+def guardar_paises(nombre_archivo, paises):
+
+    """
+    Guarda la lista de países en el archivo CSV.
+    Sobrescribe el contenido anterior del archivo.
     """
 
-    while True:
-        # Se solicitan ambos valores usando la validación de enteros positivos
-        minimo = pedir_entero_positivo(mensaje_minimo)
-        maximo = pedir_entero_positivo(mensaje_maximo)
+    try:
+        # Se abre el archivo en modo escritura para guardar todos los países actuales
+        with open(nombre_archivo, mode='w', encoding='utf-8', newline='') as archivo:
 
-        # Se valida que el mínimo no sea mayor que el máximo
-        if minimo <= maximo:
-            return minimo, maximo
+            # Se definen los nombres de las columnas del CSV
+            campos = ["nombre", "poblacion", "superficie", "continente"]
 
-        print(ERROR_RANGO_INVALIDO)
+            # DictWriter permite escribir diccionarios en formato CSV
+            escritor = csv.DictWriter(archivo, fieldnames=campos)
+
+            # Se escribe la fila de encabezados
+            escritor.writeheader()
+
+            # Se escriben todos los países de la lista
+            escritor.writerows(paises)
+
+        print(MENSAJE_CAMBIOS_GUARDADOS)
+        return True
+    except PermissionError:
+        # Este error puede ocurrir si el archivo CSV está abierto en Excel u otro programa
+        print(ERROR_GUARDADO_ARCHIVO)
+        return False
+
+# ==============================
+# Funciones de filtros
+# ==============================
+
 
 def filtrar_por_continente(paises):
     """
@@ -301,30 +467,9 @@ def filtrar_por_rango_superficie(paises):
     else:
         print(MENSAJE_SIN_RESULTADOS)
 
-def pedir_tipo_orden():
-    """
-    Solicita al usuario el tipo de ordenamiento.
-    Devuelve False para ascendente y True para descendente.
-    """
-
-    while True:
-        print("\nSeleccione el tipo de orden:")
-        print("1. Ascendente")
-        print("2. Descendente")
-
-        # Se solicita la opción y se eliminan espacios innecesarios
-        opcion = input("Seleccione una opción: ").strip()
-
-        # En sorted(), reverse=False indica orden ascendente
-        if opcion == "1":
-            return False
-
-        # En sorted(), reverse=True indica orden descendente
-        elif opcion == "2":
-            return True
-
-        else:
-            print(MENSAJE_OPCION_INVALIDA)
+# ==============================
+# Funciones de ordenamiento
+# ==============================
 
 def ordenar_paises(paises, criterio, descendente):
     """
@@ -337,18 +482,9 @@ def ordenar_paises(paises, criterio, descendente):
     # reverse indica si el orden será ascendente o descendente.
     return sorted(paises, key=lambda pais: pais[criterio], reverse=descendente)
 
-
-def mostrar_paises(paises):
-    """
-    Muestra una lista de países.
-    """
-
-    if not paises:
-        print(MENSAJE_NO_HAY_PAISES)
-    else:
-        for pais in paises:
-            print("-" * 40)
-            mostrar_pais(pais)
+# ==============================
+# Funciones de estadísticas
+# =============================
 
 def obtener_pais_extremo(paises, campo, buscar_maximo=True):
     """
@@ -398,82 +534,10 @@ def contar_paises_por_continente(paises):
 
     return cantidades
 
-def confirmar_guardado_con_errores():
-    """
-    Solicita confirmación al usuario antes de guardar cuando el CSV tenía errores.
-    Devuelve True si el usuario confirma y False si cancela.
-    """
+# ==============================
+# Funciones de opciones del menú
+# ==============================
 
-    while True:
-        # Se pide confirmación porque guardar eliminará los registros inválidos del CSV
-        respuesta = input(CONFIRMAR_GUARDADO_CON_ERRORES).strip().lower()
-
-        if respuesta == "s":
-            return True
-
-        elif respuesta == "n":
-            return False
-
-        else:
-            print(MENSAJE_OPCION_INVALIDA)
-
-
-#=== Funciones Principales ===
-
-
-def cargar_paises(nombre_archivo):
-    """
-    Lee el archivo CSV y devuelve una lista de diccionarios.
-    Cada diccionario representa un país.
-    """
-    
-    paises = []
-    hubo_errores_csv = False
-    try:
-        
-        with open(nombre_archivo, mode='r', encoding='utf-8', newline='') as archivo: # Abrir el archivo CSV en modo lectura con codificación UTF-8
-            lector = csv.DictReader(archivo) # Crear un lector de CSV que devuelve cada fila como un diccionario
-            for fila in lector:
-
-                try:
-                    if tiene_campos_vacios(fila):
-                        print(ERROR_PAIS_CON_CAMPO_VACIO.format(fila["nombre"]))
-                        hubo_errores_csv = True
-                        continue
-
-                    pais = {
-                        "nombre": fila["nombre"].strip(),
-                        "poblacion": int(fila["poblacion"]),
-                        "superficie": int(fila["superficie"]),
-                        "continente": fila["continente"].strip()
-                    }
-
-                    paises.append(pais)
-
-                except ValueError:
-                    hubo_errores_csv = True
-                    print(ERROR_CSV_NUMERO_INVALIDO.format(fila["nombre"]))
-    
-    except FileNotFoundError:
-        hubo_errores_csv = True
-        print(ERROR_ARCHIVO_NO_ENCONTRADO.format(nombre_archivo))
-
-    
-    except KeyError as e:
-        hubo_errores_csv = True
-        print(ERROR_CSV_COLUMNA_FALTANTE.format(e))
-    
-    if not paises:
-        print(ADVERTENCIA_NO_HAY_PAISES)
-    
-    if hubo_errores_csv:
-        print("=" * 100)
-        print(ADVERTENCIA_CSV_CON_ERRORES)
-        print(ADVERTENCIA_GUARDADO_LIMPIEZA)
-        print(MENSAJE_RECOMENDACION_CSV)
-        print("=" * 100)
-    return paises, hubo_errores_csv
-    
 def opcion_agregar_pais(paises):
     """
     Solicita los datos de un país y lo agrega a la lista de países.
@@ -497,16 +561,16 @@ def opcion_agregar_pais(paises):
 
     # Se crea el diccionario que representa al país
     pais = {
-        "nombre": nombre,
+        "nombre": nombre.capitalize(),
         "poblacion": poblacion,
         "superficie": superficie,
-        "continente": continente
+        "continente": continente.capitalize()
     }
 
     # Se agrega el nuevo país a la lista principal
     paises.append(pais)
 
-    print("País agregado correctamente.")
+    print(MENSAJE_PAIS_AGREGADO)
 
 def opcion_actualizar_pais(paises):
     """
@@ -570,7 +634,7 @@ def opcion_buscar_pais(paises):
         print("\nPaíses encontrados:")
         mostrar_paises(resultados)
     else:
-        print("No se encontraron países con ese nombre.")
+        print(ERROR_PAIS_NO_ENCONTRADO)
 
 def opcion_filtrar_paises(paises):
     """
@@ -704,37 +768,9 @@ def opcion_mostrar_paises(paises):
     print("\n=== Lista de países ===")
     mostrar_paises(paises)
 
-
-def opcion_guardar_salir(nombre_archivo, paises):
-    """
-    Guarda la lista de países en el archivo CSV.
-    Sobrescribe el contenido anterior del archivo.
-    """
-
-    try:
-        # Se abre el archivo en modo escritura para guardar todos los países actuales
-        with open(nombre_archivo, mode='w', encoding='utf-8', newline='') as archivo:
-
-            # Se definen los nombres de las columnas del CSV
-            campos = ["nombre", "poblacion", "superficie", "continente"]
-
-            # DictWriter permite escribir diccionarios en formato CSV
-            escritor = csv.DictWriter(archivo, fieldnames=campos)
-
-            # Se escribe la fila de encabezados
-            escritor.writeheader()
-
-            # Se escriben todos los países de la lista
-            escritor.writerows(paises)
-
-        print(MENSAJE_CAMBIOS_GUARDADOS)
-        return True
-    except PermissionError:
-        # Este error puede ocurrir si el archivo CSV está abierto en Excel u otro programa
-        print(ERROR_GUARDADO_ARCHIVO)
-        return False
-
-
+# ==============================
+# Programa principal
+# ==============================
 
 def main():
     """
@@ -782,7 +818,7 @@ def main():
                 confirmar = confirmar_guardado_con_errores()
 
                 if confirmar:
-                    guardado_correcto = opcion_guardar_salir(ARCHIVO_CSV, paises)
+                    guardado_correcto = guardar_paises(ARCHIVO_CSV, paises)
                     if guardado_correcto:
                         print(MENSAJE_SALIDA)
                     else:
