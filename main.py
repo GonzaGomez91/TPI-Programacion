@@ -8,6 +8,10 @@ ERROR_ARCHIVO_NO_ENCONTRADO = "Error: no se encontró el archivo {}."
 ERROR_CSV_COLUMNA_FALTANTE = "Error: falta la columna {} en el archivo CSV."
 ERROR_CSV_NUMERO_INVALIDO = "Error: el país {} tiene un valor numérico inválido en población o superficie."
 ERROR_PAIS_CON_CAMPO_VACIO = "Error: el país {} tiene campos vacíos."
+ERROR_CAMPO_INGRESADO_VACIO = "Error: el campo ingresado no puede estar vacío."
+ERROR_NUMERO_INVALIDO = "Error: debe ingresar un número entero válido."
+ERROR_NUMERO_NO_POSITIVO = "Error: el número debe ser mayor que cero."
+ERROR_PAIS_EXISTENTE = "Error: ya existe un país registrado con ese nombre."
 
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 
@@ -16,6 +20,19 @@ MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."
 MENSAJE_SALIDA = "Saliendo del programa..."
 
 #=== Funciones Auxiliares ===
+def mostrar_menu():
+    """
+    Muestra el menú principal del sistema.
+    """
+    print("\n===== Gestión de Datos de Países =====")
+    print("1. Agregar país")
+    print("2. Actualizar país")
+    print("3. Buscar país por nombre")
+    print("4. Filtrar países")
+    print("5. Ordenar países")
+    print("6. Mostrar estadísticas")
+    print("7. Mostrar todos los países")
+    print("0. Salir")
 
 def tiene_campos_vacios(fila):
     """
@@ -38,19 +55,6 @@ def mostrar_pais(pais):
     print(f"Superficie: {pais['superficie']} km²")
     print(f"Continente: {pais['continente']}")
 
-def mostrar_menu():
-    """
-    Muestra el menú principal del sistema.
-    """
-    print("\n===== Gestión de Datos de Países =====")
-    print("1. Agregar país")
-    print("2. Actualizar país")
-    print("3. Buscar país por nombre")
-    print("4. Filtrar países")
-    print("5. Ordenar países")
-    print("6. Mostrar estadísticas")
-    print("7. Mostrar todos los países")
-    print("0. Salir")
 
 def buscar_paises_por_nombre(paises, nombre_buscado):
     """
@@ -72,6 +76,63 @@ def buscar_paises_por_nombre(paises, nombre_buscado):
             resultados.append(pais)
 
     return resultados
+
+def pedir_texto_no_vacio(mensaje):
+    """
+    Solicita un texto al usuario y valida que no esté vacío.
+    Devuelve el texto ingresado sin espacios innecesarios.
+    """
+
+    texto = input(mensaje).strip()
+
+    # Se valida que el usuario no haya dejado el campo vacío
+    while texto == "":
+        print(ERROR_CAMPO_INGRESADO_VACIO)
+        texto = input(mensaje).strip()
+
+    return texto
+
+
+def pedir_entero_positivo(mensaje):
+    """
+    Solicita un número entero positivo al usuario.
+    Repite la solicitud hasta que el valor ingresado sea válido.
+    """
+
+    numero_valido = False
+    numero = 0
+
+    # Se repite hasta que el usuario ingrese un entero positivo
+    while not numero_valido:
+        try:
+            numero = int(input(mensaje))
+
+            # Se valida que el número sea mayor que cero
+            if numero > 0:
+                numero_valido = True
+            else:
+                print(ERROR_NUMERO_NO_POSITIVO)
+
+        except ValueError:
+            print(ERROR_NUMERO_INVALIDO)
+
+    return numero
+
+def existe_pais(paises, nombre):
+    """
+    Verifica si ya existe un país con el mismo nombre.
+    La comparación no distingue entre mayúsculas y minúsculas.
+    """
+
+    # Se normaliza el nombre ingresado
+    nombre = nombre.strip().lower()
+
+    # Se recorre la lista de países para buscar coincidencia exacta
+    for pais in paises:
+        if pais["nombre"].lower() == nombre:
+            return True
+
+    return False
 
 #=== Funciones Principales ===
 def cargar_paises(nombre_archivo):
@@ -136,13 +197,8 @@ def opcion_buscar_pais(paises):
     Solicita un nombre al usuario y muestra los países encontrados.
     """
 
-    # Se pide al usuario el texto a buscar
-    nombre_buscado = input("Ingrese el nombre del país a buscar: ").strip()
-
-    # Se valida que el usuario no haya ingresado un texto vacío
-    if nombre_buscado == "":
-        print("Error: debe ingresar un nombre para buscar.")
-        return
+   # Se solicita el nombre a buscar, validando que no esté vacío
+    nombre_buscado = pedir_texto_no_vacio("Ingrese el nombre del país a buscar: ")
 
     # Se buscan coincidencias parciales o exactas
     resultados = buscar_paises_por_nombre(paises, nombre_buscado)
@@ -154,8 +210,39 @@ def opcion_buscar_pais(paises):
     else:
         print("No se encontraron países con ese nombre.")
 
+def agregar_pais(paises):
+    """
+    Solicita los datos de un país y lo agrega a la lista de países.
+    """
 
+    print("\n=== Agregar país ===")
 
+       # Se solicita el nombre del nuevo país
+    nombre = pedir_texto_no_vacio("Ingrese el nombre del país: ")
+
+    # Se verifica que no exista otro país con el mismo nombre
+    if existe_pais(paises, nombre):
+        print(ERROR_PAIS_EXISTENTE)
+        return
+
+    
+    # Se solicitan los datos del nuevo país
+    poblacion = pedir_entero_positivo("Ingrese la población: ")
+    superficie = pedir_entero_positivo("Ingrese la superficie en km²: ")
+    continente = pedir_texto_no_vacio("Ingrese el continente: ")
+
+    # Se crea el diccionario que representa al país
+    pais = {
+        "nombre": nombre,
+        "poblacion": poblacion,
+        "superficie": superficie,
+        "continente": continente
+    }
+
+    # Se agrega el nuevo país a la lista principal
+    paises.append(pais)
+
+    print("País agregado correctamente.")
 
 def main():
     """
@@ -177,7 +264,7 @@ def main():
         opcion = input("Seleccione una opción: ").strip()
 
         if opcion == "1":
-            print("Funcionalidad pendiente: agregar país.")
+            agregar_pais(paises)
 
         elif opcion == "2":
             print("Funcionalidad pendiente: actualizar país.")
