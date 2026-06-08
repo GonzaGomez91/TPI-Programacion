@@ -14,6 +14,7 @@ ERROR_NUMERO_NO_POSITIVO = "Error: el número debe ser mayor que cero."
 ERROR_PAIS_EXISTENTE = "Error: ya existe un país registrado con ese nombre."
 ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
 ERROR_RANGO_INVALIDO = "Error: el valor mínimo no puede ser mayor que el valor máximo."
+ERROR_GUARDADO_ARCHIVO = "Error: no se pudo guardar el archivo. Verifique que no esté abierto en otro programa."
 
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 ADVERTENCIA_CSV_CON_ERRORES = "Advertencia: algunos países del CSV tenían errores y no fueron cargados."
@@ -727,10 +728,11 @@ def opcion_guardar_salir(nombre_archivo, paises):
             escritor.writerows(paises)
 
         print(MENSAJE_CAMBIOS_GUARDADOS)
-
+        return True
     except PermissionError:
         # Este error puede ocurrir si el archivo CSV está abierto en Excel u otro programa
-        print("Error: no se pudo guardar el archivo. Verifique que no esté abierto en otro programa.")
+        print(ERROR_GUARDADO_ARCHIVO)
+        return False
 
 
 
@@ -780,16 +782,24 @@ def main():
                 confirmar = confirmar_guardado_con_errores()
 
                 if confirmar:
-                    opcion_guardar_salir(ARCHIVO_CSV, paises)
-                    print(MENSAJE_SALIDA)
+                    guardado_correcto = opcion_guardar_salir(ARCHIVO_CSV, paises)
+                    if guardado_correcto:
+                        print(MENSAJE_SALIDA)
+                    else:
+                        opcion = ""
+
+
                 else:
                     print(MENSAJE_GUARDADO_CANCELADO)
                     opcion = ""
-
+                
             else:
                 # Si no hubo errores en la carga, se guarda normalmente
-                opcion_guardar_salir(ARCHIVO_CSV, paises)
-                print(MENSAJE_SALIDA)
+                guardado_correcto = opcion_guardar_salir(ARCHIVO_CSV, paises)
+                if guardado_correcto:
+                    print(MENSAJE_SALIDA)
+                else:
+                    opcion = ""
 
         elif opcion == "0":
             print(MENSAJE_SALIDA)
@@ -802,4 +812,5 @@ def main():
             input("\nPresione Enter para continuar...")
 
 # Punto de entrada
-main()
+if __name__ == "__main__":
+    main()
