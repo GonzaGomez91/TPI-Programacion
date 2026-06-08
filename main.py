@@ -12,12 +12,17 @@ ERROR_CAMPO_INGRESADO_VACIO = "Error: el campo ingresado no puede estar vacío."
 ERROR_NUMERO_INVALIDO = "Error: debe ingresar un número entero válido."
 ERROR_NUMERO_NO_POSITIVO = "Error: el número debe ser mayor que cero."
 ERROR_PAIS_EXISTENTE = "Error: ya existe un país registrado con ese nombre."
+ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
 
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 
 MENSAJE_NO_HAY_PAISES = "No hay países para mostrar."
 MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."
 MENSAJE_SALIDA = "Saliendo del programa..."
+MENSAJE_ACTUALIZACION_CANCELADA = "Actualización cancelada."
+MENSAJE_PAIS_ACTUALIZADO = "País actualizado correctamente."
+
+
 
 #=== Funciones Auxiliares ===
 def mostrar_menu():
@@ -134,6 +139,40 @@ def existe_pais(paises, nombre):
 
     return False
 
+def seleccionar_pais(resultados):
+    """
+    Permite seleccionar un país de una lista de resultados.
+    Devuelve el país seleccionado o None si el usuario cancela con 0.
+    """
+
+    print("\nSe encontraron varios países:")
+
+    # Se muestran los países encontrados con un número de opción
+    for i, pais in enumerate(resultados, start=1):
+        print(f"{i}. {pais['nombre']} - {pais['continente']}")
+
+    print("0. Cancelar")
+
+    while True:
+        try:
+            # Se solicita al usuario que elija uno de los resultados
+            opcion = int(input("Seleccione el número del país: "))
+
+            # La opción 0 permite cancelar la selección
+            if opcion == 0:
+                return None
+
+            # Si la opción está dentro del rango, se devuelve el país seleccionado
+            if 1 <= opcion <= len(resultados):
+                return resultados[opcion - 1]
+
+            # Si el número está fuera del rango, se muestra mensaje general
+            print(MENSAJE_OPCION_INVALIDA)
+
+        except ValueError:
+            # Si el usuario ingresa algo que no puede convertirse a entero
+            print(MENSAJE_OPCION_INVALIDA)
+
 #=== Funciones Principales ===
 def cargar_paises(nombre_archivo):
     """
@@ -192,24 +231,6 @@ def mostrar_paises(paises):
             print("-" * 40)
             mostrar_pais(pais)
 
-def opcion_buscar_pais(paises):
-    """
-    Solicita un nombre al usuario y muestra los países encontrados.
-    """
-
-   # Se solicita el nombre a buscar, validando que no esté vacío
-    nombre_buscado = pedir_texto_no_vacio("Ingrese el nombre del país a buscar: ")
-
-    # Se buscan coincidencias parciales o exactas
-    resultados = buscar_paises_por_nombre(paises, nombre_buscado)
-
-    # Se muestran los resultados encontrados
-    if resultados:
-        print("\nPaíses encontrados:")
-        mostrar_paises(resultados)
-    else:
-        print("No se encontraron países con ese nombre.")
-
 def agregar_pais(paises):
     """
     Solicita los datos de un país y lo agrega a la lista de países.
@@ -244,6 +265,70 @@ def agregar_pais(paises):
 
     print("País agregado correctamente.")
 
+def actualizar_pais(paises):
+    """
+    Permite actualizar la población y la superficie de un país existente.
+    La búsqueda permite coincidencias parciales.
+    """
+
+    print("\n=== Actualizar país ===")
+
+    # Se solicita el nombre o parte del nombre del país a actualizar
+    nombre_buscado = pedir_texto_no_vacio("Ingrese el nombre o parte del nombre del país a actualizar: ")
+
+    # Se buscan países que coincidan parcial o totalmente con el texto ingresado
+    resultados = buscar_paises_por_nombre(paises, nombre_buscado)
+
+    # Si no se encontraron países, se informa el error y se termina la función
+    if not resultados:
+        print(ERROR_PAIS_NO_ENCONTRADO)
+        return
+
+    # Si hay un solo resultado, se selecciona automáticamente
+    if len(resultados) == 1:
+        pais = resultados[0]
+
+    # Si hay varios resultados, se le pide al usuario que seleccione uno
+    else:
+        pais = seleccionar_pais(resultados)
+
+        # Si el usuario cancela con 0, no se realiza ninguna modificación
+        if pais is None:
+            print(MENSAJE_ACTUALIZACION_CANCELADA)
+            return
+
+    # Se muestran los datos actuales antes de actualizarlos
+    print("\nDatos actuales del país:")
+    mostrar_pais(pais)
+
+    # Se solicitan los nuevos valores usando la validación de enteros positivos
+    nueva_poblacion = pedir_entero_positivo("Ingrese la nueva población: ")
+    nueva_superficie = pedir_entero_positivo("Ingrese la nueva superficie en km²: ")
+
+    # Se actualizan únicamente población y superficie, como pide la consigna
+    pais["poblacion"] = nueva_poblacion
+    pais["superficie"] = nueva_superficie
+
+    print(MENSAJE_PAIS_ACTUALIZADO)
+
+def opcion_buscar_pais(paises):
+    """
+    Solicita un nombre al usuario y muestra los países encontrados.
+    """
+
+   # Se solicita el nombre a buscar, validando que no esté vacío
+    nombre_buscado = pedir_texto_no_vacio("Ingrese el nombre del país a buscar: ")
+
+    # Se buscan coincidencias parciales o exactas
+    resultados = buscar_paises_por_nombre(paises, nombre_buscado)
+
+    # Se muestran los resultados encontrados
+    if resultados:
+        print("\nPaíses encontrados:")
+        mostrar_paises(resultados)
+    else:
+        print("No se encontraron países con ese nombre.")
+
 def main():
     """
     Ejecuta el programa principal.
@@ -267,7 +352,7 @@ def main():
             agregar_pais(paises)
 
         elif opcion == "2":
-            print("Funcionalidad pendiente: actualizar país.")
+            actualizar_pais(paises)
 
         elif opcion == "3":
             opcion_buscar_pais(paises)
