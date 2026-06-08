@@ -781,6 +781,7 @@ def main():
 
                 if confirmar:
                     opcion_guardar_salir(ARCHIVO_CSV, paises)
+                    print(MENSAJE_SALIDA)
                 else:
                     print(MENSAJE_GUARDADO_CANCELADO)
                     opcion = ""
@@ -788,6 +789,7 @@ def main():
             else:
                 # Si no hubo errores en la carga, se guarda normalmente
                 opcion_guardar_salir(ARCHIVO_CSV, paises)
+                print(MENSAJE_SALIDA)
 
         elif opcion == "0":
             print(MENSAJE_SALIDA)
