@@ -1,6 +1,6 @@
 nombre,poblacion,superficie,continente
-Argentina,45376763
-,213993437,8515767,América
+Argentina,45376763,2780400,América
+País Incorrecto,abc,12345,Europa
+Brasil,213993437,8515767,América
+Otro Incorrecto,1000000,superficie desconocida,Asia
 Japón,125800000,377975,Asia
-Brasil,,8515767,América
-Alemania,83149300,357022,
