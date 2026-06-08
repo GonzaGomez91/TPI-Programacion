@@ -16,6 +16,8 @@ ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
 ERROR_RANGO_INVALIDO = "Error: el valor mínimo no puede ser mayor que el valor máximo."
 
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
+ADVERTENCIA_CSV_CON_ERRORES = "Advertencia: algunos países del CSV tenían errores y no fueron cargados."
+ADVERTENCIA_GUARDADO_LIMPIEZA = "Si guarda los cambios, los países con errores serán eliminados del archivo CSV."
 
 MENSAJE_NO_HAY_PAISES = "No hay países para mostrar."
 MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."
@@ -25,6 +27,11 @@ MENSAJE_PAIS_ACTUALIZADO = "País actualizado correctamente."
 MENSAJE_SIN_RESULTADOS = "No se encontraron países con ese criterio."
 MENSAJE_VOLVER_MENU = "Volviendo al menú principal..."
 MENSAJE_ESTADISTICAS = "===== Estadísticas de países ====="
+MENSAJE_CAMBIOS_GUARDADOS = "Cambios guardados correctamente."
+MENSAJE_RECOMENDACION_CSV = "Puede corregir el CSV manualmente y volver a abrir el programa, o guardar para limpiar el archivo."
+MENSAJE_GUARDADO_CANCELADO = "Guardado cancelado."
+
+CONFIRMAR_GUARDADO_CON_ERRORES = "El CSV tenía errores. Si continúa, se guardarán solo los países válidos. ¿Desea continuar? (s/n): "
 
 #=== Funciones de Menú ===
 
@@ -32,6 +39,7 @@ def mostrar_menu():
     """
     Muestra el menú principal del sistema.
     """
+
     print("\n===== Gestión de Datos de Países =====")
     print("1. Agregar país")
     print("2. Actualizar país")
@@ -40,7 +48,8 @@ def mostrar_menu():
     print("5. Ordenar países")
     print("6. Mostrar estadísticas")
     print("7. Mostrar todos los países")
-    print("0. Salir")
+    print("8. Guardar cambios y salir")
+    print("0. Salir sin guardar")
 
 def mostrar_menu_filtros():
     """
@@ -340,49 +349,32 @@ def mostrar_paises(paises):
             print("-" * 40)
             mostrar_pais(pais)
 
-def obtener_pais_mayor_poblacion(paises):
+def obtener_pais_extremo(paises, campo, buscar_maximo=True):
     """
-    Devuelve el país con mayor población.
-    """
-
-    # max() busca el país cuyo valor de población sea el más alto
-    return max(paises, key=lambda pais: pais["poblacion"])
-
-def obtener_pais_menor_poblacion(paises):
-    """
-    Devuelve el país con menor población.
+    Devuelve el país con el valor máximo o mínimo de un campo numérico.
     """
 
-    # min() busca el país cuyo valor de población sea el más bajo
-    return min(paises, key=lambda pais: pais["poblacion"])
+    # Si buscar_maximo es True, se devuelve el país con el valor más alto
+    if buscar_maximo:
+        return max(paises, key=lambda pais: pais[campo])
 
-def calcular_promedio_poblacion(paises):
+    # Si buscar_maximo es False, se devuelve el país con el valor más bajo
+    return min(paises, key=lambda pais: pais[campo])
+
+def calcular_promedio(paises, campo):
     """
-    Calcula y devuelve el promedio de población de los países.
+    Calcula y devuelve el promedio de un campo numérico de los países.
+    Por ejemplo: población o superficie.
     """
 
-    # Se acumula la población total de todos los países
-    total_poblacion = 0
+    total = 0
 
+    # Se recorre la lista de países acumulando el valor del campo indicado
     for pais in paises:
-        total_poblacion += pais["poblacion"]
+        total += pais[campo]
 
     # Se divide el total por la cantidad de países
-    return total_poblacion / len(paises)
-
-def calcular_promedio_superficie(paises):
-    """
-    Calcula y devuelve el promedio de superficie de los países.
-    """
-
-    # Se acumula la superficie total de todos los países
-    total_superficie = 0
-
-    for pais in paises:
-        total_superficie += pais["superficie"]
-
-    # Se divide el total por la cantidad de países
-    return total_superficie / len(paises)
+    return total / len(paises)
 
 def contar_paises_por_continente(paises):
     """
@@ -405,6 +397,26 @@ def contar_paises_por_continente(paises):
 
     return cantidades
 
+def confirmar_guardado_con_errores():
+    """
+    Solicita confirmación al usuario antes de guardar cuando el CSV tenía errores.
+    Devuelve True si el usuario confirma y False si cancela.
+    """
+
+    while True:
+        # Se pide confirmación porque guardar eliminará los registros inválidos del CSV
+        respuesta = input(CONFIRMAR_GUARDADO_CON_ERRORES).strip().lower()
+
+        if respuesta == "s":
+            return True
+
+        elif respuesta == "n":
+            return False
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+
 #=== Funciones Principales ===
 
 
@@ -415,7 +427,7 @@ def cargar_paises(nombre_archivo):
     """
     
     paises = []
-
+    hubo_errores_csv = False
     try:
         
         with open(nombre_archivo, mode='r', encoding='utf-8', newline='') as archivo: # Abrir el archivo CSV en modo lectura con codificación UTF-8
@@ -425,6 +437,7 @@ def cargar_paises(nombre_archivo):
                 try:
                     if tiene_campos_vacios(fila):
                         print(ERROR_PAIS_CON_CAMPO_VACIO.format(fila["nombre"]))
+                        hubo_errores_csv = True
                         continue
 
                     pais = {
@@ -437,19 +450,28 @@ def cargar_paises(nombre_archivo):
                     paises.append(pais)
 
                 except ValueError:
+                    hubo_errores_csv = True
                     print(ERROR_CSV_NUMERO_INVALIDO.format(fila["nombre"]))
     
     except FileNotFoundError:
+        hubo_errores_csv = True
         print(ERROR_ARCHIVO_NO_ENCONTRADO.format(nombre_archivo))
 
     
     except KeyError as e:
+        hubo_errores_csv = True
         print(ERROR_CSV_COLUMNA_FALTANTE.format(e))
     
     if not paises:
         print(ADVERTENCIA_NO_HAY_PAISES)
-
-    return paises
+    
+    if hubo_errores_csv:
+        print("=" * 100)
+        print(ADVERTENCIA_CSV_CON_ERRORES)
+        print(ADVERTENCIA_GUARDADO_LIMPIEZA)
+        print(MENSAJE_RECOMENDACION_CSV)
+        print("=" * 100)
+    return paises, hubo_errores_csv
     
 def opcion_agregar_pais(paises):
     """
@@ -636,7 +658,7 @@ def opcion_ordenar_paises(paises):
         if opcion != "0":
             input("\nPresione Enter para continuar...")
 
-def mostrar_estadisticas(paises):
+def opcion_mostrar_estadisticas(paises):
     """
     Muestra estadísticas generales sobre los países cargados.
     """
@@ -647,10 +669,11 @@ def mostrar_estadisticas(paises):
         return
 
     # Se obtienen los datos estadísticos usando funciones auxiliares
-    pais_mayor_poblacion = obtener_pais_mayor_poblacion(paises)
-    pais_menor_poblacion = obtener_pais_menor_poblacion(paises)
-    promedio_poblacion = calcular_promedio_poblacion(paises)
-    promedio_superficie = calcular_promedio_superficie(paises)
+
+    pais_mayor_poblacion = obtener_pais_extremo(paises, "poblacion", True)
+    pais_menor_poblacion = obtener_pais_extremo(paises, "poblacion", False)
+    promedio_poblacion = calcular_promedio(paises, "poblacion")
+    promedio_superficie = calcular_promedio(paises, "superficie")
     cantidades_por_continente = contar_paises_por_continente(paises)
 
     print(f"\n{MENSAJE_ESTADISTICAS}")
@@ -680,20 +703,51 @@ def opcion_mostrar_paises(paises):
     print("\n=== Lista de países ===")
     mostrar_paises(paises)
 
+
+def opcion_guardar_salir(nombre_archivo, paises):
+    """
+    Guarda la lista de países en el archivo CSV.
+    Sobrescribe el contenido anterior del archivo.
+    """
+
+    try:
+        # Se abre el archivo en modo escritura para guardar todos los países actuales
+        with open(nombre_archivo, mode='w', encoding='utf-8', newline='') as archivo:
+
+            # Se definen los nombres de las columnas del CSV
+            campos = ["nombre", "poblacion", "superficie", "continente"]
+
+            # DictWriter permite escribir diccionarios en formato CSV
+            escritor = csv.DictWriter(archivo, fieldnames=campos)
+
+            # Se escribe la fila de encabezados
+            escritor.writeheader()
+
+            # Se escriben todos los países de la lista
+            escritor.writerows(paises)
+
+        print(MENSAJE_CAMBIOS_GUARDADOS)
+
+    except PermissionError:
+        # Este error puede ocurrir si el archivo CSV está abierto en Excel u otro programa
+        print("Error: no se pudo guardar el archivo. Verifique que no esté abierto en otro programa.")
+
+
+
 def main():
     """
     Ejecuta el programa principal.
     Carga los países desde el CSV y muestra el menú de opciones.
     """
-
+    
     # Se cargan los países desde el archivo CSV al iniciar el programa
-    paises = cargar_paises(ARCHIVO_CSV)
+    paises, hubo_errores_csv = cargar_paises(ARCHIVO_CSV)
 
     # Se inicializa la opción con un valor distinto de "0" para entrar al bucle
     opcion = ""
 
     # El menú se repite hasta que el usuario elija salir
-    while opcion != "0":
+    while opcion != "0" and opcion != "8":
         mostrar_menu()
 
         # Se solicita una opción y se eliminan espacios innecesarios
@@ -715,10 +769,25 @@ def main():
             opcion_ordenar_paises(paises)
 
         elif opcion == "6":
-            print("Funcionalidad pendiente: mostrar estadísticas.")
+            opcion_mostrar_estadisticas(paises)
 
         elif opcion == "7":
             opcion_mostrar_paises(paises)
+
+        elif opcion == "8":
+            # Si el CSV tenía errores, se pide confirmación antes de sobrescribir el archivo
+            if hubo_errores_csv:
+                confirmar = confirmar_guardado_con_errores()
+
+                if confirmar:
+                    opcion_guardar_salir(ARCHIVO_CSV, paises)
+                else:
+                    print(MENSAJE_GUARDADO_CANCELADO)
+                    opcion = ""
+
+            else:
+                # Si no hubo errores en la carga, se guarda normalmente
+                opcion_guardar_salir(ARCHIVO_CSV, paises)
 
         elif opcion == "0":
             print(MENSAJE_SALIDA)
@@ -727,7 +796,7 @@ def main():
             print(MENSAJE_OPCION_INVALIDA)
 
         # Pausa para que el usuario pueda leer el resultado antes de volver al menú
-        if opcion != "0":
+        if opcion != "0" and opcion != "8":
             input("\nPresione Enter para continuar...")
 
 # Punto de entrada
