@@ -13,6 +13,7 @@ ERROR_NUMERO_INVALIDO = "Error: debe ingresar un número entero válido."
 ERROR_NUMERO_NO_POSITIVO = "Error: el número debe ser mayor que cero."
 ERROR_PAIS_EXISTENTE = "Error: ya existe un país registrado con ese nombre."
 ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
+ERROR_RANGO_INVALIDO = "Error: el valor mínimo no puede ser mayor que el valor máximo."
 
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 
@@ -21,10 +22,12 @@ MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."
 MENSAJE_SALIDA = "Saliendo del programa..."
 MENSAJE_ACTUALIZACION_CANCELADA = "Actualización cancelada."
 MENSAJE_PAIS_ACTUALIZADO = "País actualizado correctamente."
+MENSAJE_SIN_RESULTADOS = "No se encontraron países con ese criterio."
+MENSAJE_VOLVER_MENU = "Volviendo al menú principal..."
+MENSAJE_ESTADISTICAS = "===== Estadísticas de países ====="
 
+#=== Funciones de Menú ===
 
-
-#=== Funciones Auxiliares ===
 def mostrar_menu():
     """
     Muestra el menú principal del sistema.
@@ -38,6 +41,30 @@ def mostrar_menu():
     print("6. Mostrar estadísticas")
     print("7. Mostrar todos los países")
     print("0. Salir")
+
+def mostrar_menu_filtros():
+    """
+    Muestra el submenú de filtros disponibles.
+    """
+
+    print("\n===== Filtrar países =====")
+    print("1. Filtrar por continente")
+    print("2. Filtrar por rango de población")
+    print("3. Filtrar por rango de superficie")
+    print("0. Volver al menú principal")
+
+def mostrar_menu_ordenamientos():
+    """
+    Muestra el submenú de opciones de ordenamiento.
+    """
+
+    print("\n===== Ordenar países =====")
+    print("1. Ordenar por nombre")
+    print("2. Ordenar por población")
+    print("3. Ordenar por superficie")
+    print("0. Volver al menú principal")
+
+#=== Funciones Auxiliares ===
 
 def tiene_campos_vacios(fila):
     """
@@ -173,7 +200,214 @@ def seleccionar_pais(resultados):
             # Si el usuario ingresa algo que no puede convertirse a entero
             print(MENSAJE_OPCION_INVALIDA)
 
+def pedir_rango(mensaje_minimo, mensaje_maximo):
+    """
+    Solicita un rango numérico válido.
+    Devuelve el mínimo y el máximo ingresados.
+    """
+
+    while True:
+        # Se solicitan ambos valores usando la validación de enteros positivos
+        minimo = pedir_entero_positivo(mensaje_minimo)
+        maximo = pedir_entero_positivo(mensaje_maximo)
+
+        # Se valida que el mínimo no sea mayor que el máximo
+        if minimo <= maximo:
+            return minimo, maximo
+
+        print(ERROR_RANGO_INVALIDO)
+
+def filtrar_por_continente(paises):
+    """
+    Filtra países por continente.
+    No distingue entre mayúsculas y minúsculas.
+    """
+
+    resultados = []
+
+    # Se solicita el continente y se valida que no esté vacío
+    continente_buscado = pedir_texto_no_vacio("Ingrese el continente a filtrar: ").lower()
+
+    # Se recorren los países para buscar coincidencias exactas de continente
+    for pais in paises:
+        if pais["continente"].lower() == continente_buscado:
+            resultados.append(pais)
+
+    # Se muestran los resultados encontrados
+    if resultados:
+        mostrar_paises(resultados)
+    else:
+        print(MENSAJE_SIN_RESULTADOS)
+
+def filtrar_por_rango_poblacion(paises):
+    """
+    Filtra países cuya población esté dentro de un rango indicado por el usuario.
+    """
+
+    resultados = []
+
+    print("\n=== Filtro por rango de población ===")
+
+    # Se solicita un rango válido de población
+    poblacion_minima, poblacion_maxima = pedir_rango(
+        "Ingrese la población mínima: ",
+        "Ingrese la población máxima: "
+    )
+
+    # Se recorren los países y se agregan los que estén dentro del rango
+    for pais in paises:
+        if poblacion_minima <= pais["poblacion"] <= poblacion_maxima:
+            resultados.append(pais)
+
+    # Se muestran los resultados encontrados
+    if resultados:
+        mostrar_paises(resultados)
+    else:
+        print(MENSAJE_SIN_RESULTADOS)
+
+def filtrar_por_rango_superficie(paises):
+    """
+    Filtra países cuya superficie esté dentro de un rango indicado por el usuario.
+    """
+
+    resultados = []
+
+    print("\n=== Filtro por rango de superficie ===")
+
+    # Se solicita un rango válido de superficie
+    superficie_minima, superficie_maxima = pedir_rango(
+        "Ingrese la superficie mínima en km²: ",
+        "Ingrese la superficie máxima en km²: "
+    )
+
+    # Se recorren los países y se agregan los que estén dentro del rango
+    for pais in paises:
+        if superficie_minima <= pais["superficie"] <= superficie_maxima:
+            resultados.append(pais)
+
+    # Se muestran los resultados encontrados
+    if resultados:
+        mostrar_paises(resultados)
+    else:
+        print(MENSAJE_SIN_RESULTADOS)
+
+def pedir_tipo_orden():
+    """
+    Solicita al usuario el tipo de ordenamiento.
+    Devuelve False para ascendente y True para descendente.
+    """
+
+    while True:
+        print("\nSeleccione el tipo de orden:")
+        print("1. Ascendente")
+        print("2. Descendente")
+
+        # Se solicita la opción y se eliminan espacios innecesarios
+        opcion = input("Seleccione una opción: ").strip()
+
+        # En sorted(), reverse=False indica orden ascendente
+        if opcion == "1":
+            return False
+
+        # En sorted(), reverse=True indica orden descendente
+        elif opcion == "2":
+            return True
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+def ordenar_paises(paises, criterio, descendente):
+    """
+    Ordena una lista de países según el criterio indicado.
+    Devuelve una nueva lista ordenada sin modificar la lista original.
+    """
+
+    # sorted() genera una nueva lista ordenada.
+    # key indica qué dato del diccionario se usa para ordenar.
+    # reverse indica si el orden será ascendente o descendente.
+    return sorted(paises, key=lambda pais: pais[criterio], reverse=descendente)
+
+
+def mostrar_paises(paises):
+    """
+    Muestra una lista de países.
+    """
+
+    if not paises:
+        print(MENSAJE_NO_HAY_PAISES)
+    else:
+        for pais in paises:
+            print("-" * 40)
+            mostrar_pais(pais)
+
+def obtener_pais_mayor_poblacion(paises):
+    """
+    Devuelve el país con mayor población.
+    """
+
+    # max() busca el país cuyo valor de población sea el más alto
+    return max(paises, key=lambda pais: pais["poblacion"])
+
+def obtener_pais_menor_poblacion(paises):
+    """
+    Devuelve el país con menor población.
+    """
+
+    # min() busca el país cuyo valor de población sea el más bajo
+    return min(paises, key=lambda pais: pais["poblacion"])
+
+def calcular_promedio_poblacion(paises):
+    """
+    Calcula y devuelve el promedio de población de los países.
+    """
+
+    # Se acumula la población total de todos los países
+    total_poblacion = 0
+
+    for pais in paises:
+        total_poblacion += pais["poblacion"]
+
+    # Se divide el total por la cantidad de países
+    return total_poblacion / len(paises)
+
+def calcular_promedio_superficie(paises):
+    """
+    Calcula y devuelve el promedio de superficie de los países.
+    """
+
+    # Se acumula la superficie total de todos los países
+    total_superficie = 0
+
+    for pais in paises:
+        total_superficie += pais["superficie"]
+
+    # Se divide el total por la cantidad de países
+    return total_superficie / len(paises)
+
+def contar_paises_por_continente(paises):
+    """
+    Cuenta cuántos países hay por cada continente.
+    Devuelve un diccionario con el continente como clave y la cantidad como valor.
+    """
+
+    cantidades = {}
+
+    # Se recorre la lista de países
+    for pais in paises:
+        continente = pais["continente"]
+
+        # Si el continente no existe en el diccionario, se inicializa en 0
+        if continente not in cantidades:
+            cantidades[continente] = 0
+
+        # Se suma un país al continente correspondiente
+        cantidades[continente] += 1
+
+    return cantidades
+
 #=== Funciones Principales ===
+
+
 def cargar_paises(nombre_archivo):
     """
     Lee el archivo CSV y devuelve una lista de diccionarios.
@@ -217,21 +451,7 @@ def cargar_paises(nombre_archivo):
 
     return paises
     
-
-
-def mostrar_paises(paises):
-    """
-    Muestra una lista de países.
-    """
-
-    if not paises:
-        print(MENSAJE_NO_HAY_PAISES)
-    else:
-        for pais in paises:
-            print("-" * 40)
-            mostrar_pais(pais)
-
-def agregar_pais(paises):
+def opcion_agregar_pais(paises):
     """
     Solicita los datos de un país y lo agrega a la lista de países.
     """
@@ -265,7 +485,7 @@ def agregar_pais(paises):
 
     print("País agregado correctamente.")
 
-def actualizar_pais(paises):
+def opcion_actualizar_pais(paises):
     """
     Permite actualizar la población y la superficie de un país existente.
     La búsqueda permite coincidencias parciales.
@@ -329,6 +549,137 @@ def opcion_buscar_pais(paises):
     else:
         print("No se encontraron países con ese nombre.")
 
+def opcion_filtrar_paises(paises):
+    """
+    Permite elegir y ejecutar un filtro sobre la lista de países.
+    """
+
+    opcion = ""
+
+    # El submenú se repite hasta que el usuario elija volver
+    while opcion != "0":
+        mostrar_menu_filtros()
+
+        # Se solicita la opción del submenú
+        opcion = input("Seleccione una opción de filtro: ").strip()
+
+        if opcion == "1":
+            filtrar_por_continente(paises)
+
+        elif opcion == "2":
+            filtrar_por_rango_poblacion(paises)
+
+        elif opcion == "3":
+            filtrar_por_rango_superficie(paises)
+
+        elif opcion == "0":
+            print(MENSAJE_VOLVER_MENU)
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+        # Pausa para leer el resultado antes de volver al submenú
+        if opcion != "0":
+            input("\nPresione Enter para continuar...")
+
+def opcion_ordenar_paises(paises):
+    """
+    Permite elegir un criterio de ordenamiento y muestra los países ordenados.
+    """
+
+    opcion = ""
+
+    # El submenú se repite hasta que el usuario elija volver
+    while opcion != "0":
+        mostrar_menu_ordenamientos()
+
+        # Se solicita la opción del submenú
+        opcion = input("Seleccione una opción de ordenamiento: ").strip()
+
+        if opcion == "1":
+            # Se pide si el orden será ascendente o descendente
+            descendente = pedir_tipo_orden()
+
+            # Se ordenan los países por nombre
+            paises_ordenados = ordenar_paises(paises, "nombre", descendente)
+
+            print("\nPaíses ordenados por nombre:")
+            mostrar_paises(paises_ordenados)
+
+        elif opcion == "2":
+            # Se pide si el orden será ascendente o descendente
+            descendente = pedir_tipo_orden()
+
+            # Se ordenan los países por población
+            paises_ordenados = ordenar_paises(paises, "poblacion", descendente)
+
+            print("\nPaíses ordenados por población:")
+            mostrar_paises(paises_ordenados)
+
+        elif opcion == "3":
+            # Se pide si el orden será ascendente o descendente
+            descendente = pedir_tipo_orden()
+
+            # Se ordenan los países por superficie
+            paises_ordenados = ordenar_paises(paises, "superficie", descendente)
+
+            print("\nPaíses ordenados por superficie:")
+            mostrar_paises(paises_ordenados)
+
+        elif opcion == "0":
+            print(MENSAJE_VOLVER_MENU)
+
+        else:
+            print(MENSAJE_OPCION_INVALIDA)
+
+        # Pausa para que el usuario pueda leer los resultados antes de volver al submenú
+        if opcion != "0":
+            input("\nPresione Enter para continuar...")
+
+def mostrar_estadisticas(paises):
+    """
+    Muestra estadísticas generales sobre los países cargados.
+    """
+
+    # Si no hay países cargados, no se pueden calcular estadísticas
+    if not paises:
+        print(MENSAJE_NO_HAY_PAISES)
+        return
+
+    # Se obtienen los datos estadísticos usando funciones auxiliares
+    pais_mayor_poblacion = obtener_pais_mayor_poblacion(paises)
+    pais_menor_poblacion = obtener_pais_menor_poblacion(paises)
+    promedio_poblacion = calcular_promedio_poblacion(paises)
+    promedio_superficie = calcular_promedio_superficie(paises)
+    cantidades_por_continente = contar_paises_por_continente(paises)
+
+    print(f"\n{MENSAJE_ESTADISTICAS}")
+
+    print("\nPaís con mayor población:")
+    mostrar_pais(pais_mayor_poblacion)
+
+    print("\nPaís con menor población:")
+    mostrar_pais(pais_menor_poblacion)
+
+    print("\nPromedios:")
+    print(f"Promedio de población: {promedio_poblacion:.2f}")
+    print(f"Promedio de superficie: {promedio_superficie:.2f} km²")
+
+    print("\nCantidad de países por continente:")
+
+    # Se recorre el diccionario de cantidades para mostrar cada continente
+    for continente, cantidad in cantidades_por_continente.items():
+        print(f"{continente}: {cantidad}")
+
+
+def opcion_mostrar_paises(paises):
+    """
+    Muestra todos los países cargados en el sistema.
+    """
+
+    print("\n=== Lista de países ===")
+    mostrar_paises(paises)
+
 def main():
     """
     Ejecuta el programa principal.
@@ -349,25 +700,25 @@ def main():
         opcion = input("Seleccione una opción: ").strip()
 
         if opcion == "1":
-            agregar_pais(paises)
+            opcion_agregar_pais(paises)
 
         elif opcion == "2":
-            actualizar_pais(paises)
+            opcion_actualizar_pais(paises)
 
         elif opcion == "3":
             opcion_buscar_pais(paises)
 
         elif opcion == "4":
-            print("Funcionalidad pendiente: filtrar países.")
+            opcion_filtrar_paises(paises)
 
         elif opcion == "5":
-            print("Funcionalidad pendiente: ordenar países.")
+            opcion_ordenar_paises(paises)
 
         elif opcion == "6":
             print("Funcionalidad pendiente: mostrar estadísticas.")
 
         elif opcion == "7":
-            mostrar_paises(paises)
+            opcion_mostrar_paises(paises)
 
         elif opcion == "0":
             print(MENSAJE_SALIDA)
