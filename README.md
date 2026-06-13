@@ -390,6 +390,6 @@ Funcionalidades implementadas:
 
 ## Enlaces
 
-- Repositorio: `URL_DEL_REPOSITORIO`
-- Video demostrativo: `URL_DEL_VIDEO`
-- Informe PDF: `informe.pdf`
+- Repositorio: [Repositorio GitHub](https://github.com/GonzaGomez91/TPI-Programacion)
+- Video demostrativo: [Video demostrativo](https://youtu.be/BZjPmeeAa7I)
+- Informe PDF: [Informe PDF](informe/informe.pdf)
