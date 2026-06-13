@@ -2,7 +2,7 @@
 # Constantes
 # ==============================
 
-ARCHIVO_CSV = 'paises_prueba.csv'
+ARCHIVO_CSV = 'paises.csv'
 
 #Mensajes de Error
 ERROR_ARCHIVO_NO_ENCONTRADO = "Error: no se encontró el archivo {}."
