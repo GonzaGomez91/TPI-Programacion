@@ -81,8 +81,6 @@ def main():
 
             else:
                 # Si no hubo errores en la carga, se guarda normalmente
-                # IMPORTANTE: en el archivo original se llamaba a opcion_guardar_salir(),
-                # pero esa función no estaba definida. Por eso se usa guardar_paises().
                 guardado_correcto = guardar_paises(ARCHIVO_CSV, paises)
                 if guardado_correcto:
                     print(MENSAJE_SALIDA)
