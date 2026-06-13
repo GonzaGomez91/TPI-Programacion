@@ -1,8 +1,9 @@
-from constantes import MENSAJE_NO_HAY_PAISES
+import constantes
 
 # ==============================
 # Funciones de visualización
 # ==============================
+
 
 def mostrar_pais(pais):
     """
@@ -20,7 +21,7 @@ def mostrar_paises(paises):
     """
 
     if not paises:
-        print(MENSAJE_NO_HAY_PAISES)
+        print(constantes.MENSAJE_NO_HAY_PAISES)
     else:
         for pais in paises:
             print("-" * 40)

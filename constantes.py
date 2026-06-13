@@ -4,7 +4,7 @@
 
 ARCHIVO_CSV = 'paises_prueba.csv'
 
-# Mensajes de Error
+#Mensajes de Error
 ERROR_ARCHIVO_NO_ENCONTRADO = "Error: no se encontró el archivo {}."
 ERROR_CSV_COLUMNA_FALTANTE = "Error: falta la columna {} en el archivo CSV."
 ERROR_CSV_NUMERO_INVALIDO = "Error: el país {} tiene un valor numérico inválido en población o superficie."
@@ -17,12 +17,12 @@ ERROR_PAIS_NO_ENCONTRADO = "Error: no se encontraron países con ese nombre."
 ERROR_RANGO_INVALIDO = "Error: el valor mínimo no puede ser mayor que el valor máximo."
 ERROR_GUARDADO_ARCHIVO = "Error: no se pudo guardar el archivo. Verifique que no esté abierto en otro programa."
 
-# Mensajes de Advertencia
+#Mensajes de Advertencia
 ADVERTENCIA_NO_HAY_PAISES = "Advertencia: no se cargaron países desde el archivo CSV."
 ADVERTENCIA_CSV_CON_ERRORES = "Advertencia: algunos países del CSV tenían errores y no fueron cargados."
 ADVERTENCIA_GUARDADO_LIMPIEZA = "Si guarda los cambios, los países con errores serán eliminados del archivo CSV."
 
-# Mensajes Generales
+#Mensajes Generales
 MENSAJE_PAIS_AGREGADO = "País agregado correctamente."
 MENSAJE_NO_HAY_PAISES = "No hay países para mostrar."
 MENSAJE_OPCION_INVALIDA = "Opción inválida. Intente nuevamente."

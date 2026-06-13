@@ -1,15 +1,9 @@
-from constantes import (
-    ERROR_CAMPO_INGRESADO_VACIO,
-    ERROR_NUMERO_INVALIDO,
-    ERROR_NUMERO_NO_POSITIVO,
-    ERROR_RANGO_INVALIDO,
-    MENSAJE_OPCION_INVALIDA,
-    CONFIRMAR_GUARDADO_CON_ERRORES
-)
+import constantes
 
 # =================================
 # Funciones de validación y entrada
 # =================================
+
 
 def tiene_campos_vacios(fila):
     """
@@ -32,7 +26,7 @@ def pedir_texto_no_vacio(mensaje):
 
     # Se valida que el usuario no haya dejado el campo vacío
     while texto == "":
-        print(ERROR_CAMPO_INGRESADO_VACIO)
+        print(constantes.ERROR_CAMPO_INGRESADO_VACIO)
         texto = input(mensaje).strip()
 
     return texto
@@ -55,10 +49,10 @@ def pedir_entero_positivo(mensaje):
             if numero > 0:
                 numero_valido = True
             else:
-                print(ERROR_NUMERO_NO_POSITIVO)
+                print(constantes.ERROR_NUMERO_NO_POSITIVO)
 
         except ValueError:
-            print(ERROR_NUMERO_INVALIDO)
+            print(constantes.ERROR_NUMERO_INVALIDO)
 
     return numero
 
@@ -77,7 +71,7 @@ def pedir_rango(mensaje_minimo, mensaje_maximo):
         if minimo <= maximo:
             return minimo, maximo
 
-        print(ERROR_RANGO_INVALIDO)
+        print(constantes.ERROR_RANGO_INVALIDO)
 
 def pedir_tipo_orden():
     """
@@ -102,7 +96,7 @@ def pedir_tipo_orden():
             return True
 
         else:
-            print(MENSAJE_OPCION_INVALIDA)
+            print(constantes.MENSAJE_OPCION_INVALIDA)
 
 def confirmar_guardado_con_errores():
     """
@@ -112,7 +106,7 @@ def confirmar_guardado_con_errores():
 
     while True:
         # Se pide confirmación porque guardar eliminará los registros inválidos del CSV
-        respuesta = input(CONFIRMAR_GUARDADO_CON_ERRORES).strip().lower()
+        respuesta = input(constantes.CONFIRMAR_GUARDADO_CON_ERRORES).strip().lower()
 
         if respuesta == "s":
             return True
@@ -121,4 +115,4 @@ def confirmar_guardado_con_errores():
             return False
 
         else:
-            print(MENSAJE_OPCION_INVALIDA)
+            print(constantes.MENSAJE_OPCION_INVALIDA)

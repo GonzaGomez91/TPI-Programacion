@@ -1,4 +1,4 @@
-from constantes import MENSAJE_OPCION_INVALIDA
+import constantes
 
 # ==============================
 # Funciones de búsqueda y selección
@@ -69,8 +69,8 @@ def seleccionar_pais(resultados):
                 return resultados[opcion - 1]
 
             # Si el número está fuera del rango, se muestra mensaje general
-            print(MENSAJE_OPCION_INVALIDA)
+            print(constantes.MENSAJE_OPCION_INVALIDA)
 
         except ValueError:
             # Si el usuario ingresa algo que no puede convertirse a entero
-            print(MENSAJE_OPCION_INVALIDA)
+            print(constantes.MENSAJE_OPCION_INVALIDA)

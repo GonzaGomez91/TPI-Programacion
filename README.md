@@ -35,6 +35,16 @@ El objetivo del trabajo es aplicar los contenidos vistos en Programación 1, esp
 tpi-programacion/
 │
 ├── main.py
+├── archivo_csv.py
+├── busqueda.py
+├── constantes.py
+├── estadisticas.py
+├── filtros.py
+├── menus.py
+├── opciones.py
+├── ordenamiento.py
+├── validaciones.py
+├── visualizacion.py
 ├── paises.csv
 ├── README.md
 ├── informe.pdf
@@ -306,21 +316,21 @@ Cuando el CSV contiene registros inválidos, el programa informa al usuario que 
 
 ## Organización del código
 
-El archivo `main.py` está organizado por responsabilidades:
+El programa está organizado en módulos según sus responsabilidades:
 
-- Constantes de mensajes.
-- Funciones de menú.
-- Funciones auxiliares.
-- Funciones de validación y entrada.
-- Funciones de búsqueda y selección.
-- Funciones de filtros.
-- Funciones de ordenamiento.
-- Funciones de estadísticas.
-- Funciones de carga y guardado CSV.
-- Funciones asociadas a las opciones del menú.
-- Función principal `main()`.
+- `main.py`: función principal `main()` y punto de entrada del programa.
+- `constantes.py`: constantes de mensajes y nombre del archivo CSV.
+- `menus.py`: funciones de menú.
+- `validaciones.py`: funciones de validación y entrada.
+- `visualizacion.py`: funciones para mostrar países.
+- `busqueda.py`: funciones de búsqueda y selección.
+- `archivo_csv.py`: funciones de carga y guardado CSV.
+- `filtros.py`: funciones de filtros.
+- `ordenamiento.py`: funciones de ordenamiento.
+- `estadisticas.py`: funciones de estadísticas.
+- `opciones.py`: funciones asociadas a las opciones del menú.
 
-Esta organización permite que cada función tenga una responsabilidad clara y facilita la lectura, mantenimiento y prueba del código.
+Esta organización permite que cada función mantenga una responsabilidad clara y facilita la lectura, mantenimiento y prueba del código.
 
 ## Capturas de pantalla
 
