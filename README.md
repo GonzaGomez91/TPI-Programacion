@@ -47,8 +47,7 @@ tpi-programacion/
 ├── visualizacion.py
 ├── paises.csv
 ├── README.md
-├── informe.pdf
-└── capturas/
+└── informe.pdf
 ```
 
 ## Formato del archivo CSV
